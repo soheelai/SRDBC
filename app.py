@@ -162,7 +162,7 @@ Extract all shipping label and invoice details from this image in strict JSON fo
 All amounts must be numbers. Return ONLY pure raw JSON without markdown markers or backticks.
 """
                             response = client.models.generate_content(
-                                model="gemini-2.5-flash",
+                                model="gemini-3.6-flash",
                                 contents=[prompt, image]
                             )
 
