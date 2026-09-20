@@ -9,6 +9,7 @@ from google import genai
 st.set_page_config(page_title="E-Commerce AI OS", layout="wide")
 st.title("📦 E-Commerce Business & Finance Operating System")
 
+# Database Setup
 conn = sqlite3.connect("business_data.db", check_same_thread=False)
 cursor = conn.cursor()
 
@@ -42,9 +43,13 @@ CREATE TABLE IF NOT EXISTS orders (
 """)
 conn.commit()
 
+# Configuration (Sidebar)
 st.sidebar.header("⚙️ Configuration")
-gemini_api_key = st.sidebar.text_input("Gemini API Key", type="password")
+gemini_api_key = st.secrets.get("GEMINI_API_KEY", "")
+if not gemini_api_key:
+    gemini_api_key = st.sidebar.text_input("Gemini API Key", type="password")
 
+# Tabs
 tab1, tab2, tab3, tab4 = st.tabs([
     "📸 AI Bill Scanner", 
     "🛒 Orders & Sales Tracker", 
@@ -52,6 +57,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "🚀 Marketing & Automation"
 ])
 
+# 1. Bill Scanner
 with tab1:
     st.subheader("Purchase Bill / Invoice Scanner")
     uploaded_file = st.file_uploader("Bill ki photo upload karo (JPG/PNG)", type=["jpg", "png", "jpeg"])
@@ -62,7 +68,7 @@ with tab1:
 
         if st.button("AI se Bill Scan Karo"):
             if not gemini_api_key:
-                st.error("Pehle Sidebar me Gemini API Key enter karo!")
+                st.error("Pehle Sidebar ya Secrets me Gemini API Key enter karo!")
             else:
                 try:
                     with st.spinner("AI bill ko read kar raha hai..."):
@@ -113,6 +119,7 @@ with tab1:
     df_purchases = pd.read_sql_query("SELECT * FROM purchases ORDER BY id DESC", conn)
     st.dataframe(df_purchases, use_container_width=True)
 
+# 2. Orders Tracker
 with tab2:
     st.subheader("Naya Order Entry & Tracking")
     with st.form("new_order_form"):
@@ -145,6 +152,7 @@ with tab2:
     df_orders = pd.read_sql_query("SELECT * FROM orders ORDER BY id DESC", conn)
     st.dataframe(df_orders, use_container_width=True)
 
+# 3. Reports
 with tab3:
     st.subheader("📈 Month-End Business Performance")
     total_purchases = cursor.execute("SELECT SUM(total_amount) FROM purchases").fetchone()[0] or 0.0
@@ -166,10 +174,11 @@ with tab3:
         st.subheader("Platform Breakdown")
         st.bar_chart(df_orders["platform"].value_counts())
 
+# 4. Marketing Blueprint
 with tab4:
     st.subheader("🤖 Marketing & Auto DM Blueprint")
     st.markdown("""
-    - **Instagram Auto DM:** ManyChat use karke comment-to-DM automated triggers set karein.
-    - **WhatsApp Automation:** Interakt ya Wati ke sath order tracking aur follow-up auto-message trigger karein.
+    - **Instagram Auto DM:** ManyChat integrate karke keyword comments ("Price", "Link") par automated DM send karein.
+    - **WhatsApp Automation:** Interakt ya Wati ke sath order confirmation aur hold tracking auto-messages set karein.
     """)
-      
+            
